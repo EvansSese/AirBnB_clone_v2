@@ -1,14 +1,23 @@
 #!/usr/bin/python3
 """This module defines a base class for all models in our hbnb clone"""
 import uuid
+import models
 from datetime import datetime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, DateTime
 
 
 time_format = "%Y-%m-%dT%H:%M:%S.%f"
+Base = declarative_base()
 
 
 class BaseModel:
     """A base class for all hbnb models"""
+    if models.storage_type == 'db':
+        id = Column(String(60), primary_key=True, nullable=False)
+        created_at = Column(DateTime, default=datetime.utcnow(), nullable=False)
+        updated_at = Column(DateTime, default=datetime.utcnow(), nullable=False)
+
     def __init__(self, *args, **kwargs):
         """Initialization of the base model"""
         if kwargs:
@@ -45,11 +54,19 @@ class BaseModel:
         storage.save()
 
     def to_dict(self):
-        """Convert instance into dict format"""
-        dictionary = {}
-        dictionary.update(self.__dict__)
-        dictionary.update({'__class__':
-                          (str(type(self)).split('.')[-1]).split('\'')[0]})
-        dictionary['created_at'] = self.created_at.isoformat()
-        dictionary['updated_at'] = self.updated_at.isoformat()
-        return dictionary
+        """Returns Dict of Key/Value"""
+        key_dict = self.__dict__.copy()
+        if "created_at" in key_dict:
+            key_dict["created_at"] = (key_dict["created_at"]
+                                      .strftime(time_format))
+        if "updated_at" in key_dict:
+            key_dict["updated_at"] = (key_dict["updated_at"]
+                                      .strftime(time_format))
+        key_dict["__class__"] = self.__class__.__name__
+        if "_sa_instance_state" in key_dict:
+            del key_dict["_sa_instance_state"]
+        return key_dict
+
+    def delete(self):
+        """Delete instance from Storage"""
+        models.storage.delete(self)
