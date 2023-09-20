@@ -18,5 +18,3 @@ class State(BaseModel, Base):
     def __init__(self, *args, **kwargs):
         """Init state"""
         super().__init__(*args, **kwargs)
-
-
