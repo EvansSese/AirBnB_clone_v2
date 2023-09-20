@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 
-time = "%Y-%m-%dT%H:%M:%S.%f"
+time_format = "%Y-%m-%dT%H:%M:%S.%f"
 
 
 class BaseModel:
@@ -16,11 +16,13 @@ class BaseModel:
                 if key != "__class__":
                     setattr(self, key, value)
             if kwargs.get("created_at", None) and type(self.created_at) is str:
-                self.created_at = datetime.strptime(kwargs["created_at"], time)
+                self.created_at = datetime.strptime(kwargs["created_at"],
+                                                    time_format)
             else:
                 self.created_at = datetime.now()
             if kwargs.get("updated_at", None) and type(self.updated_at) is str:
-                self.updated_at = datetime.strptime(kwargs["updated_at"], time)
+                self.updated_at = datetime.strptime(kwargs["updated_at"],
+                                                    time_format)
             else:
                 self.updated_at = datetime.now()
             if kwargs.get("id", None) is None:
@@ -39,6 +41,7 @@ class BaseModel:
         """Updates updated_at with current time when instance is changed"""
         from models import storage
         self.updated_at = datetime.now()
+        storage.new(self)
         storage.save()
 
     def to_dict(self):

@@ -3,13 +3,19 @@
 import cmd
 import sys
 from models.base_model import BaseModel
-from models.__init__ import storage
+from models import storage
+import models
 from models.user import User
 from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+import shlex
+
+
+classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
+           "Place": Place, "Review": Review, "State": State, "User": User}
 
 
 class HBNBCommand(cmd.Cmd):
@@ -113,40 +119,41 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
-        args_list = args.split()
-        class_name = args_list[0]
-        if class_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        attr_dict = {}
-        for param in args_list[1:]:
-            key_value_pair = param.split('=')
-            if len(key_value_pair) != 2:
-                continue
-            key, value = key_value_pair
+    def _kv_creator(self, args):
+        """creates a dictionary from a list of strings"""
+        str_dict = {}
+        for arg in args:
+            if "=" in arg:
+                key_value_pair = arg.split('=', 1)
+                key = key_value_pair[0]
+                value = key_value_pair[1]
+                if value[0] == value[-1] == '"':
+                    value = shlex.split(value)[0].replace('_', ' ')
+                else:
+                    try:
+                        value = int(value)
+                    except:
+                        try:
+                            value = float(value)
+                        except:
+                            continue
+                str_dict[key] = value
+        return str_dict
 
-            if value[0] == value[-1] == '"':
-                value = value[1:-1].replace('_', ' ')
-            elif '.' in value:
-                try:
-                    value = float(value)
-                except ValueError:
-                    continue
-            else:
-                try:
-                    value = int(value)
-                except ValueError:
-                    continue
-            attr_dict[key] = value
-        new_instance = HBNBCommand.classes[class_name](**attr_dict)
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+    def do_create(self, arg):
+        """Creates a new instance of a class"""
+        args = arg.split()
+        if len(args) == 0:
+            print("** class name missing **")
+            return False
+        if args[0] in classes:
+            str_dict = self._kv_creator(args[1:])
+            new_model = classes[args[0]](**str_dict)
+        else:
+            print("** class doesn't exist **")
+            return False
+        print(new_model.id)
+        new_model.save()
 
 
     def help_create(self):
