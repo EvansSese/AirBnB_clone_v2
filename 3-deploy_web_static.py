@@ -7,7 +7,6 @@ from datetime import datetime
 import os
 
 
-
 env.hosts = ['54.87.250.91', '3.89.160.129']
 env.user = 'ubuntu'
 
@@ -23,6 +22,7 @@ def do_pack():
         return "versions/{}".format(archive_name)
     except Exception:
         return None
+
 
 def do_deploy(archive_path):
     """Distribute an archive to web servers."""
@@ -55,6 +55,7 @@ def do_deploy(archive_path):
         return True
     except Exception:
         return False
+
 
 def deploy():
     """Deploy the web_static content to web servers."""
