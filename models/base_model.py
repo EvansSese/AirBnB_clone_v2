@@ -1,19 +1,20 @@
 #!/usr/bin/python3
 """This module defines a base class for all models in our hbnb clone"""
 import uuid
-import models
+from os import getenv
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, DateTime
 
 
-time_format = "%Y-%m-%dT%H:%M:%S.%f"
 Base = declarative_base()
+time_format = "%Y-%m-%dT%H:%M:%S.%f"
 
 
 class BaseModel:
     """A base class for all hbnb models"""
-    if models.storage_type == 'db':
+    storage_type = getenv("HBNB_TYPE_STORAGE")
+    if storage_type == 'db':
         id = Column(String(60), primary_key=True, nullable=False)
         created_at = Column(DateTime, default=datetime.utcnow(), nullable=False)
         updated_at = Column(DateTime, default=datetime.utcnow(), nullable=False)
@@ -69,4 +70,5 @@ class BaseModel:
 
     def delete(self):
         """Delete instance from Storage"""
-        models.storage.delete(self)
+        from models.__init__ import storage
+        storage.delete(self)
