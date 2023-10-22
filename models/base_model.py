@@ -51,10 +51,9 @@ class BaseModel:
 
     def save(self):
         """Updates updated_at with current time when instance is changed"""
-        from models import storage
         self.updated_at = datetime.now()
-        storage.new(self)
-        storage.save()
+        models.storage.new(self)
+        models.storage.save()
 
     def to_dict(self):
         """Returns Dict of Key/Value"""
@@ -72,5 +71,4 @@ class BaseModel:
 
     def delete(self):
         """Delete instance from Storage"""
-        from models.__init__ import storage
-        storage.delete(self)
+        models.storage.delete(self)
