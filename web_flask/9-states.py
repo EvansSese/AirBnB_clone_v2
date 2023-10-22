@@ -16,7 +16,7 @@ def list_states(id=None):
     """ Display states in alphabetical order"""
     states = storage.all(State)
     if id is not None:
-        state_id = 'State.' + id
+        id = 'State.' + id
     return render_template('9-states.html',
                            states=states, id=id)
 
